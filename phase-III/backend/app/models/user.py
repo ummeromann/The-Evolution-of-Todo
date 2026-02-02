@@ -5,6 +5,7 @@ from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.models.task import Task
+    from app.models.conversation import Conversation
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
@@ -17,3 +18,6 @@ class User(SQLModel, table=True):
 
     # Relationship to tasks
     tasks: List["Task"] = Relationship(back_populates="user", cascade_delete=True)
+
+    # Relationship to conversations
+    conversations: List["Conversation"] = Relationship(back_populates="user", cascade_delete=True)

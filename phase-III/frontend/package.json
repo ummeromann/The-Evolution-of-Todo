@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@openai/chatkit-react": "^1.4.3",
     "@types/pg": "^8.16.0",
     "better-auth": "^1.4.12",
     "clsx": "^2.1.1",

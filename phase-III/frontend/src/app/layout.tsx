@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/auth-context";
 
 export const metadata: Metadata = {
-  title: "Phase-II Todo App",
+  title: "Phase-III Todo App",
   description: "Multi-user todo web application with authentication",
 };
 

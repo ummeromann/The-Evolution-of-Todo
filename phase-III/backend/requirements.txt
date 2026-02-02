@@ -22,3 +22,7 @@ bcrypt>=4.1.0
 
 # CORS
 python-multipart>=0.0.6
+
+# AI Chatbot - Phase III
+openai-agents>=0.7.0
+mcp>=1.26.0

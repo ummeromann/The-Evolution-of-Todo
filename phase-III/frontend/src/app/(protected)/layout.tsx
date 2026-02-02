@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -33,6 +34,7 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isLoading, isAuthenticated, signout } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -93,7 +95,33 @@ export default function ProtectedLayout({
       <header className="bg-card border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-xl font-bold text-foreground">Smart Todo Manager</h1>
+            <div className="flex items-center gap-6">
+              <h1 className="text-xl font-bold text-foreground">Smart Todo Manager</h1>
+
+              {/* Navigation */}
+              <nav className="flex items-center gap-1">
+                <Link
+                  href="/dashboard"
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    pathname === "/dashboard"
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  Tasks
+                </Link>
+                <Link
+                  href="/chat"
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    pathname === "/chat"
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  AI Chat
+                </Link>
+              </nav>
+            </div>
 
             <div className="flex items-center gap-4">
               {/* Theme toggle */}

@@ -21,7 +21,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import settings
-from app.api.routes import health_router, tasks_router, auth_router
+from app.api.routes import health_router, tasks_router, auth_router, chat_router
 
 app = FastAPI(
     title="Todo API",
@@ -45,6 +45,7 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(tasks_router)
 app.include_router(auth_router)
+app.include_router(chat_router)
 
 
 @app.get("/")
