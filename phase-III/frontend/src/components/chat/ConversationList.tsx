@@ -55,16 +55,24 @@ export function ConversationList({
       return;
     }
 
+    // Optimistically remove from UI first
+    setConversations((prev) => prev.filter((c) => c.id !== id));
+
+    // If we deleted the current conversation, start a new one immediately
+    if (currentConversationId === id) {
+      onNewConversation();
+    }
+
     try {
       await chatApi.deleteConversation(id);
-      setConversations((prev) => prev.filter((c) => c.id !== id));
-
-      // If we deleted the current conversation, start a new one
-      if (currentConversationId === id) {
-        onNewConversation();
-      }
     } catch (err) {
-      console.error("Failed to delete conversation:", err);
+      // Ignore 404 errors - conversation already deleted
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      if (!errorMessage.includes("not found") && !errorMessage.includes("404")) {
+        console.error("Failed to delete conversation:", err);
+        // Reload the list to get the correct state
+        loadConversations();
+      }
     }
   };
 

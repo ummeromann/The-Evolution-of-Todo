@@ -4,10 +4,20 @@ Application configuration settings using pydantic-settings.
 Loads environment variables from .env file and provides type-safe configuration.
 """
 
-from typing import List
+import os
+from typing import List, Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Load .env file into os.environ so third-party libraries (like OpenAI SDK) can access them
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Get the directory containing this config file, then go up to backend/
+_backend_dir = Path(__file__).parent.parent
+_env_file = _backend_dir / ".env"
+load_dotenv(_env_file)
 
 
 class Settings(BaseSettings):
@@ -40,6 +50,12 @@ class Settings(BaseSettings):
     DEBUG: bool = Field(
         default=False,
         description="Debug mode - enables detailed error messages and auto-reload"
+    )
+
+    # OpenAI API Key (required for AI Chatbot - Phase III)
+    OPENAI_API_KEY: Optional[str] = Field(
+        default=None,
+        description="OpenAI API key for AI chatbot functionality"
     )
 
     model_config = SettingsConfigDict(

@@ -15,8 +15,20 @@ import os
 from typing import List, Dict, Any, Optional
 from uuid import UUID
 
-from agents import Agent, Runner, function_tool
+from agents import Agent, Runner, function_tool, set_default_openai_client
+from openai import AsyncOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
+
+# Configure OpenAI client for custom base URL (Ollama, Groq, etc.)
+_base_url = os.environ.get("OPENAI_BASE_URL")
+_api_key = os.environ.get("OPENAI_API_KEY", "ollama")
+
+if _base_url:
+    _client = AsyncOpenAI(
+        base_url=_base_url,
+        api_key=_api_key,
+    )
+    set_default_openai_client(_client)
 
 from app.services.mcp_tools import (
     add_todo,
@@ -105,8 +117,8 @@ Response: "I've removed 2 completed tasks from your list."
 # Function Tools for Agent
 # ============================================================================
 
-@function_tool
-async def tool_add_todo(description: str) -> dict:
+@function_tool(name_override="add_todo")
+async def fn_add_todo(description: str) -> dict:
     """
     Add a new todo task for the user.
 
@@ -116,8 +128,8 @@ async def tool_add_todo(description: str) -> dict:
     return await add_todo(description)
 
 
-@function_tool
-async def tool_list_todos(include_completed: bool = True) -> dict:
+@function_tool(name_override="list_todos")
+async def fn_list_todos(include_completed: bool = True) -> dict:
     """
     List all todo tasks for the user.
 
@@ -127,8 +139,8 @@ async def tool_list_todos(include_completed: bool = True) -> dict:
     return await list_todos(include_completed)
 
 
-@function_tool
-async def tool_complete_todo(
+@function_tool(name_override="complete_todo")
+async def fn_complete_todo(
     task_id: str = None,
     description_match: str = None
 ) -> dict:
@@ -142,8 +154,8 @@ async def tool_complete_todo(
     return await complete_todo(task_id, description_match)
 
 
-@function_tool
-async def tool_update_todo(
+@function_tool(name_override="update_todo")
+async def fn_update_todo(
     new_description: str,
     task_id: str = None,
     description_match: str = None
@@ -159,8 +171,8 @@ async def tool_update_todo(
     return await update_todo(new_description, task_id, description_match)
 
 
-@function_tool
-async def tool_delete_todo(
+@function_tool(name_override="delete_todo")
+async def fn_delete_todo(
     task_id: str = None,
     description_match: str = None,
     delete_completed: bool = False
@@ -182,15 +194,19 @@ async def tool_delete_todo(
 
 def create_todo_agent() -> Agent:
     """Create and configure the Todo AI Agent."""
+    # Use model from environment variable (supports OpenAI, Groq, Ollama, etc.)
+    model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+
     return Agent(
         name="Todo Assistant",
         instructions=AGENT_INSTRUCTIONS,
+        model=model,
         tools=[
-            tool_add_todo,
-            tool_list_todos,
-            tool_complete_todo,
-            tool_update_todo,
-            tool_delete_todo,
+            fn_add_todo,
+            fn_list_todos,
+            fn_complete_todo,
+            fn_update_todo,
+            fn_delete_todo,
         ],
     )
 

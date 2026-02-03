@@ -18,6 +18,7 @@ from uuid import UUID
 from datetime import datetime
 from typing import Optional
 import logging
+import json
 
 from app.api.deps import get_db, get_current_user
 from app.api.rate_limit import check_chat_rate_limit
@@ -144,18 +145,34 @@ async def send_chat_message(
         # Store tool calls
         tool_call_records = []
         for tc in agent_result.get("tool_calls", []):
+            # Parse parameters if it's a JSON string
+            params = tc.get("parameters", {})
+            if isinstance(params, str):
+                try:
+                    params = json.loads(params)
+                except json.JSONDecodeError:
+                    params = {}
+
+            # Parse result if it's a JSON string
+            result = tc.get("result")
+            if isinstance(result, str):
+                try:
+                    result = json.loads(result)
+                except json.JSONDecodeError:
+                    pass  # Keep as string if not valid JSON
+
             tool_call = ToolCall(
                 message_id=assistant_message.id,
                 tool_name=tc.get("tool_name", "unknown"),
-                parameters=tc.get("parameters", {}),
-                result=tc.get("result"),
+                parameters=params,
+                result=result,
                 status="success",
             )
             db.add(tool_call)
             tool_call_records.append(ToolCallRecord(
                 tool_name=tc.get("tool_name", "unknown"),
-                parameters=tc.get("parameters", {}),
-                result=tc.get("result"),
+                parameters=params,
+                result=result,
             ))
 
         # Update conversation timestamp
